@@ -2,12 +2,17 @@ package com.example.doginfo.ui.theme
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,11 +89,25 @@ fun DogItem(dog: DogImageResponse, navController: NavHostController) {
         )
     }
 }
+
+
 @Composable
-fun DogListView(dogs: List<DogImageResponse>, navController: NavHostController) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 50.dp)) {
+fun DogListView(
+    navController: NavHostController,
+    dogs: List<DogImageResponse>
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         items(dogs) { dog ->
             DogItem(dog = dog, navController = navController)
         }
     }
 }
+
+
