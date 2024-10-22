@@ -15,7 +15,7 @@ class DogListViewModel: ViewModel() {
 
     fun handleIntent(intent: DogListIntent){
         when(intent){
-        is DogListIntent.FetchDogs -> fetchDogs()
+            is DogListIntent.FetchDogs -> fetchDogs()
         }
     }
     private fun fetchDogs() {

@@ -1,6 +1,7 @@
 package com.example.doginfo.ui.theme
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,13 +20,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.doginfo.model.DogImageResponse
 import com.example.doginfo.model.DogListState
 import com.example.doginfo.viewmodel.DogListViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun DogListScreen(viewModel: DogListViewModel) {
+fun DogListScreen(viewModel: DogListViewModel, navController: NavHostController) {
     val state by viewModel.state.collectAsState()
 
     when (state) {
@@ -34,14 +38,15 @@ fun DogListScreen(viewModel: DogListViewModel) {
         }
         is DogListState.Success -> {
             val dogs = (state as DogListState.Success).dogs
-            DogListView(dogs = dogs)
+            DogListView(dogs = dogs, navController = navController) // Pass navController
         }
         is DogListState.Error -> {
             val error = (state as DogListState.Error).error
-            ErrorView(error) // Pass the error message
+            ErrorView(error)
         }
     }
 }
+
 
 @Composable
 fun LoadingView() {
@@ -58,12 +63,16 @@ fun ErrorView(error: String) {
 }
 
 @Composable
-fun DogItem(dog: DogImageResponse) {
+fun DogItem(dog: DogImageResponse, navController: NavHostController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-         // elevation = 4.dp
+            .padding(8.dp)
+            .clickable {
+                // Encode URL to safely pass it as a parameter
+                val encodedUrl = URLEncoder.encode(dog.url, StandardCharsets.UTF_8.toString())
+                navController.navigate("dogDetails/$encodedUrl")
+            },
     ) {
         Image(
             painter = rememberAsyncImagePainter(model = dog.url),
@@ -75,12 +84,11 @@ fun DogItem(dog: DogImageResponse) {
         )
     }
 }
-
 @Composable
-fun DogListView(dogs: List<DogImageResponse>) {
+fun DogListView(dogs: List<DogImageResponse>, navController: NavHostController) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 50.dp)) {
         items(dogs) { dog ->
-            DogItem(dog = dog)
+            DogItem(dog = dog, navController = navController)
         }
     }
 }
