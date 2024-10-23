@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,7 +41,9 @@ fun DogListScreen(viewModel: DogListViewModel, navController: NavHostController)
         }
         is DogListState.Success -> {
             val dogs = (state as DogListState.Success).dogs
-            DogListView(dogs = dogs, navController = navController) // Pass navController
+            // Group dogs into sections for the horizontal lists
+            val dogSections = dogs.chunked(5) // Split into sections, each containing 5 dogs
+            DogListView(dogs = dogSections, navController = navController)
         }
         is DogListState.Error -> {
             val error = (state as DogListState.Error).error
@@ -51,7 +51,6 @@ fun DogListScreen(viewModel: DogListViewModel, navController: NavHostController)
         }
     }
 }
-
 
 @Composable
 fun LoadingView() {
@@ -71,13 +70,14 @@ fun ErrorView(error: String) {
 fun DogItem(dog: DogImageResponse, navController: NavHostController) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(150.dp)
+            .height(200.dp)
             .padding(8.dp)
             .clickable {
                 // Encode URL to safely pass it as a parameter
                 val encodedUrl = URLEncoder.encode(dog.url, StandardCharsets.UTF_8.toString())
                 navController.navigate("dogDetails/$encodedUrl")
-            },
+            }
     ) {
         Image(
             painter = rememberAsyncImagePainter(model = dog.url),
@@ -90,24 +90,27 @@ fun DogItem(dog: DogImageResponse, navController: NavHostController) {
     }
 }
 
-
 @Composable
 fun DogListView(
     navController: NavHostController,
-    dogs: List<DogImageResponse>
+    dogs: List<List<DogImageResponse>> // List of lists representing multiple horizontal lists
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(dogs) { dog ->
-            DogItem(dog = dog, navController = navController)
+    LazyColumn(modifier = Modifier.fillMaxSize().padding(20.dp).padding(top = 30.dp)) {
+        items(dogs){dogSection ->
+            Text(
+                text = "Dogs",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(8.dp)
+            )
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(dogSection){dog ->
+                    DogItem(dog = dog,navController = navController)
+                }
+            }
         }
     }
 }
-
-
